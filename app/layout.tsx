@@ -30,6 +30,11 @@ export const metadata: Metadata = {
   },
   description:
     "Free, fast, and privacy-friendly URL shortener. Shorten long destination URLs with custom aliases, expiration dates, and real-time click analytics.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
   keywords: [
     "tinyclick",
     "url shortener",
