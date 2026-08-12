@@ -122,7 +122,7 @@ export async function apiClient<T>(
   } catch {
     throw new ApiException(
       0,
-      "Unable to connect to the server. Please check your connection or gateway status."
+      "Unable to connect to the server. Please check your connection."
     );
   }
 
