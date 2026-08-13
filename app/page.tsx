@@ -67,28 +67,28 @@ export default function HomePage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            {!isInitializing && (
-              isAuthenticated ? (
-                <Link href="/app/dashboard">
-                  <Button variant="primary" size="sm" className="text-xs">
-                    Dashboard
+          <div className="flex items-center gap-2 min-h-[32px]">
+            {isInitializing ? (
+              <div className="h-8 w-20 rounded-lg bg-neutral-200/60 dark:bg-neutral-800/60 animate-pulse" />
+            ) : isAuthenticated ? (
+              <Link href="/app/dashboard">
+                <Button variant="primary" size="sm" className="text-xs">
+                  Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" size="sm" className="text-xs">
+                    Sign in
                   </Button>
                 </Link>
-              ) : (
-                <>
-                  <Link href="/login">
-                    <Button variant="ghost" size="sm" className="text-xs">
-                      Sign in
-                    </Button>
-                  </Link>
-                  <Link href="/register">
-                    <Button variant="primary" size="sm" className="text-xs" leftIcon={<UserIcon className="h-3.5 w-3.5" />}>
-                      Get Started
-                    </Button>
-                  </Link>
-                </>
-              )
+                <Link href="/register">
+                  <Button variant="primary" size="sm" className="text-xs" leftIcon={<UserIcon className="h-3.5 w-3.5" />}>
+                    Get Started
+                  </Button>
+                </Link>
+              </>
             )}
           </div>
         </div>
