@@ -5,12 +5,14 @@ import Link from "next/link";
 import { UrlCreator } from "@/components/urls/url-creator";
 import { formatPublicShortUrl, truncateUrl } from "@/lib/utils/format";
 import { useToast } from "@/components/ui/toast";
+import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { CopyIcon, CheckIcon, ExternalLinkIcon, LinkIcon, UserIcon } from "@/components/ui/icons";
 import type { ShortUrlResponse } from "@/types/api";
 
 export default function HomePage() {
   const { success } = useToast();
+  const { isAuthenticated, isInitializing } = useAuth();
   const [createdLinks, setCreatedLinks] = useState<ShortUrlResponse[]>([]);
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
@@ -66,16 +68,28 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-xs">
-                Sign in
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button variant="primary" size="sm" className="text-xs" leftIcon={<UserIcon className="h-3.5 w-3.5" />}>
-                Get Started
-              </Button>
-            </Link>
+            {!isInitializing && (
+              isAuthenticated ? (
+                <Link href="/app/dashboard">
+                  <Button variant="primary" size="sm" className="text-xs">
+                    Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost" size="sm" className="text-xs">
+                      Sign in
+                    </Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button variant="primary" size="sm" className="text-xs" leftIcon={<UserIcon className="h-3.5 w-3.5" />}>
+                      Get Started
+                    </Button>
+                  </Link>
+                </>
+              )
+            )}
           </div>
         </div>
       </header>
