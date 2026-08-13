@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Navbar } from "./navbar";
 
 interface AppShellProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
@@ -15,7 +15,7 @@ export function AppShell({ children }: AppShellProps) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/admin");
+      router.push("/login");
     }
   }, [isAuthenticated, isLoading, router]);
 

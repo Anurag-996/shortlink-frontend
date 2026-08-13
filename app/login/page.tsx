@@ -6,13 +6,13 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth/auth-context";
 import { LoginForm } from "@/components/auth/login-form";
 
-export default function AdminLoginPage() {
+export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace("/dashboard");
+      router.replace("/app/dashboard");
     }
   }, [isAuthenticated, isLoading, router]);
 

@@ -29,6 +29,29 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface EmailRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export interface AuthResponse {
   accessToken: string;
   tokenType: string;
@@ -46,9 +69,26 @@ export interface ApiError {
   errors?: Record<string, string> | string[];
 }
 
+export interface UserProfileResponse {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  enabled: boolean;
+}
+
+export interface UpdateProfileRequest {
+  name: string;
+}
+
 export interface UserSession {
   email: string;
+  name?: string;
+  role?: string;
+  enabled?: boolean;
   token: string;
   tokenType: string;
   expiresAt: number; // timestamp in ms
 }
+
+

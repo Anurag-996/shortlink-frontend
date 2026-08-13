@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 import { createShortUrl } from "@/lib/api/urls";
 import { formatPublicShortUrl, truncateUrl } from "@/lib/utils/format";
 import { useToast } from "@/components/ui/toast";
@@ -34,7 +34,7 @@ export function UrlCreator({ onCreated, className = "" }: UrlCreatorProps) {
   const [createdUrl, setCreatedUrl] = useState<ShortUrlResponse | null>(null);
   const [hasCopied, setHasCopied] = useState(false);
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage(null);
 

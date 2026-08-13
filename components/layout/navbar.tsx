@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -18,9 +18,15 @@ export function Navbar() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const navLinks = [
-    { label: "Dashboard", href: "/dashboard" },
-    { label: "URLs", href: "/urls" },
-    { label: "Settings", href: "/settings" },
+    { label: "Dashboard", href: "/app/dashboard" },
+    { label: "URLs", href: "/app/urls" },
+    ...(user?.role === "ADMIN"
+      ? [
+          { label: "Platform Analytics", href: "/app/admin/analytics" },
+          { label: "Users", href: "/app/admin/users" },
+        ]
+      : []),
+    { label: "Settings", href: "/app/settings" },
   ];
 
   const handleLogout = async () => {
@@ -38,7 +44,7 @@ export function Navbar() {
         {/* Brand Logo & Wordmark */}
         <div className="flex items-center gap-8">
           <Link
-            href={isAuthenticated ? "/dashboard" : "/"}
+            href={isAuthenticated ? "/app/dashboard" : "/"}
             className="flex items-center gap-2 text-sm font-semibold tracking-tight text-neutral-900 dark:text-neutral-100"
           >
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900">
@@ -51,7 +57,7 @@ export function Navbar() {
           {isAuthenticated && (
             <nav className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive = pathname === link.href || (link.href === "/app/dashboard" && pathname === "/app");
                 return (
                   <Link
                     key={link.href}
@@ -73,10 +79,13 @@ export function Navbar() {
         {/* Right side area */}
         {isAuthenticated && (
           <div className="hidden md:flex items-center gap-3">
-            {user?.email && (
+            {user && (
               <div className="flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                <span className="max-w-[160px] truncate">{user.email}</span>
+                <span className="max-w-[140px] truncate">{user.name || user.email}</span>
+                <span className="rounded-md bg-neutral-200/80 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
+                  {user.role || "USER"}
+                </span>
               </div>
             )}
 
@@ -134,10 +143,15 @@ export function Navbar() {
           </nav>
 
           <div className="mt-3 border-t border-neutral-100 pt-3 dark:border-neutral-800 flex items-center justify-between">
-            {user?.email && (
-              <span className="text-xs text-neutral-500 dark:text-neutral-400 truncate max-w-[200px]">
-                {user.email}
-              </span>
+            {user && (
+              <div className="flex items-center gap-1.5 truncate max-w-[200px]">
+                <span className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+                  {user.name || user.email}
+                </span>
+                <span className="rounded-md bg-neutral-200/80 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 shrink-0">
+                  {user.role || "USER"}
+                </span>
+              </div>
             )}
             <button
               onClick={() => {

@@ -1,4 +1,3 @@
-import React from "react";
 import { LinkIcon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 

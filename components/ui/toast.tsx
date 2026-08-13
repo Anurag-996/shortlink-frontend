@@ -1,7 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { CheckCircleIcon, AlertCircleIcon, XIcon } from "./icons";
+import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { CheckCircleIcon, AlertCircleIcon, InfoIcon, XIcon } from "./icons";
 
 export type ToastType = "success" | "error" | "info";
 
@@ -12,14 +12,14 @@ export interface ToastItem {
 }
 
 interface ToastContextType {
-  showToast: (message: string, type?: ToastType) => void;
-  success: (message: string) => void;
-  error: (message: string) => void;
+  showToast: (message: string, type?: ToastType, duration?: number) => void;
+  success: (message: string, duration?: number) => void;
+  error: (message: string, duration?: number) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-export function ToastProvider({ children }: { children: React.ReactNode }) {
+export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const removeToast = useCallback((id: string) => {
@@ -27,24 +27,24 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const showToast = useCallback(
-    (message: string, type: ToastType = "info") => {
+    (message: string, type: ToastType = "info", duration = 4000) => {
       const id = Math.random().toString(36).substring(2, 9);
       setToasts((prev) => [...prev, { id, message, type }]);
 
       setTimeout(() => {
         removeToast(id);
-      }, 3000);
+      }, duration);
     },
     [removeToast]
   );
 
   const success = useCallback(
-    (message: string) => showToast(message, "success"),
+    (message: string, duration?: number) => showToast(message, "success", duration),
     [showToast]
   );
 
   const error = useCallback(
-    (message: string) => showToast(message, "error"),
+    (message: string, duration?: number) => showToast(message, "error", duration),
     [showToast]
   );
 
@@ -53,34 +53,41 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <div
         aria-live="polite"
-        className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full"
+        className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none w-[calc(100%-2rem)] sm:w-auto sm:max-w-md max-w-full"
       >
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-center justify-between gap-3 rounded-lg border px-4 py-3 text-xs font-medium shadow-md transition-all animate-in slide-in-from-bottom-2 duration-200 ${
+            role={toast.type === "error" ? "alert" : "status"}
+            className={`pointer-events-auto flex items-start justify-between gap-3 w-full sm:min-w-[320px] rounded-xl border px-3.5 py-3 text-xs sm:text-sm font-medium shadow-lg backdrop-blur-md transition-all duration-200 animate-in fade-in slide-in-from-bottom-3 ${
               toast.type === "success"
-                ? "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800/80 dark:bg-emerald-950/90 dark:text-emerald-200"
+                ? "border-emerald-200/80 bg-emerald-50/95 text-emerald-950 dark:border-emerald-800/80 dark:bg-emerald-950/95 dark:text-emerald-200 shadow-emerald-900/10"
                 : toast.type === "error"
-                ? "border-red-200 bg-red-50 text-red-900 dark:border-red-800/80 dark:bg-red-950/90 dark:text-red-200"
-                : "border-neutral-200 bg-white text-neutral-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+                ? "border-red-200/80 bg-red-50/95 text-red-950 dark:border-red-800/80 dark:bg-red-950/95 dark:text-red-200 shadow-red-900/10"
+                : "border-neutral-200/80 bg-white/95 text-neutral-900 dark:border-neutral-800 dark:bg-neutral-900/95 dark:text-neutral-100 shadow-neutral-900/10"
             }`}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-start gap-2.5 min-w-0 flex-1">
               {toast.type === "success" && (
-                <CheckCircleIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <CheckCircleIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
               )}
               {toast.type === "error" && (
-                <AlertCircleIcon className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
+                <AlertCircleIcon className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
               )}
-              <span>{toast.message}</span>
+              {toast.type === "info" && (
+                <InfoIcon className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+              )}
+              <span className="min-w-0 flex-1 break-words whitespace-normal leading-snug text-left">
+                {toast.message}
+              </span>
             </div>
             <button
+              type="button"
               onClick={() => removeToast(toast.id)}
-              className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 cursor-pointer p-0.5"
+              className="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 cursor-pointer p-0.5 shrink-0 rounded transition-colors -mr-1 -mt-0.5"
               aria-label="Dismiss notification"
             >
-              <XIcon className="w-3.5 h-3.5" />
+              <XIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         ))}

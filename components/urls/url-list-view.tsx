@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import type { ShortUrlResponse } from "@/types/api";
 import {
   formatPublicShortUrl,
@@ -359,6 +360,14 @@ export function UrlListView({
                           )}
                         </button>
 
+                        <Link
+                          href={`/app/urls/${item.id}/analytics`}
+                          className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 transition-colors"
+                          title="View Link Analytics"
+                        >
+                          <BarChartIcon className="h-3.5 w-3.5" />
+                        </Link>
+
                         <a
                           href={publicUrl}
                           target="_blank"
@@ -450,6 +459,14 @@ export function UrlListView({
                   </button>
 
                   <div className="flex items-center gap-2">
+                    <Link
+                      href={`/app/urls/${item.id}/analytics`}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
+                    >
+                      <BarChartIcon className="h-3.5 w-3.5" />
+                      <span>Stats</span>
+                    </Link>
+
                     <a
                       href={publicUrl}
                       target="_blank"

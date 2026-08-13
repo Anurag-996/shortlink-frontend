@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { UrlCreator } from "@/components/urls/url-creator";
 import { formatPublicShortUrl, truncateUrl } from "@/lib/utils/format";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
-import { CopyIcon, CheckIcon, ExternalLinkIcon, LinkIcon } from "@/components/ui/icons";
+import { CopyIcon, CheckIcon, ExternalLinkIcon, LinkIcon, UserIcon } from "@/components/ui/icons";
 import type { ShortUrlResponse } from "@/types/api";
 
 export default function HomePage() {
@@ -52,6 +53,33 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {/* Top Navbar */}
+      <header className="border-b border-neutral-200/60 dark:border-neutral-800/60 bg-white/70 dark:bg-neutral-950/70 backdrop-blur-md sticky top-0 z-30">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-900 text-white shadow-xs dark:bg-neutral-100 dark:text-neutral-900">
+              <LinkIcon className="h-4 w-4" />
+            </div>
+            <span className="text-sm font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+              TinyClick
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link href="/login">
+              <Button variant="ghost" size="sm" className="text-xs">
+                Sign in
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button variant="primary" size="sm" className="text-xs" leftIcon={<UserIcon className="h-3.5 w-3.5" />}>
+                Get Started
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
       <main className="flex-1 mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-16 space-y-10 flex flex-col justify-center">
         {/* Public Brand & Hero Heading */}
         <div className="text-center space-y-4">

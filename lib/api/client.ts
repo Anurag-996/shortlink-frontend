@@ -58,8 +58,8 @@ function getErrorMessage(status: number, backendMessage?: string): string {
   }
 }
 
-// Atomic refresh helper that deduplicates concurrent 401 refresh calls
-async function executeTokenRefresh(): Promise<string | null> {
+// Atomic refresh helper that deduplicates concurrent 401 / initialization refresh calls
+export async function executeTokenRefresh(): Promise<string | null> {
   if (refreshPromise) {
     return refreshPromise;
   }
@@ -74,6 +74,7 @@ async function executeTokenRefresh(): Promise<string | null> {
       });
 
       if (!response.ok) {
+        setApiAuthToken(null);
         return null;
       }
 
@@ -82,8 +83,10 @@ async function executeTokenRefresh(): Promise<string | null> {
         setApiAuthToken(data.accessToken);
         return data.accessToken as string;
       }
+      setApiAuthToken(null);
       return null;
     } catch {
+      setApiAuthToken(null);
       return null;
     } finally {
       refreshPromise = null;
@@ -168,7 +171,19 @@ export async function apiClient<T>(
 
     const backendMsg = errorData?.message || errorData?.error || errorData?.detail;
     const errors = errorData?.errors;
-    const message = getErrorMessage(response.status, backendMsg);
+    let message = getErrorMessage(response.status, backendMsg);
+
+    // If specific field validation errors exist, extract or combine error messages for the client
+    if (errors && typeof errors === "object" && !Array.isArray(errors)) {
+      const fieldErrors = Object.values(errors)
+        .filter((val): val is string => typeof val === "string" && val.trim().length > 0);
+
+      if (fieldErrors.length === 1) {
+        message = fieldErrors[0];
+      } else if (fieldErrors.length > 1) {
+        message = fieldErrors.join("\n");
+      }
+    }
 
     throw new ApiException(response.status, message, errors);
   }
