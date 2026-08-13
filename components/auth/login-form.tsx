@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog } from "@/components/ui/dialog";
 import { resendVerificationApi } from "@/lib/api/auth";
 import { useToast } from "@/components/ui/toast";
 import { LinkIcon, EyeIcon, EyeOffIcon, AlertCircleIcon, RefreshCwIcon } from "@/components/ui/icons";
@@ -66,6 +67,26 @@ export function LoginForm() {
 
   const UNVERIFIED_ERROR_MSG = "Please verify your email address before logging in";
   const isUnverifiedError = error === UNVERIFIED_ERROR_MSG || error === "User account is disabled";
+  const isDeletionPendingError = !!error && (error.toLowerCase().includes("deletion") || error.toLowerCase().includes("pending deletion"));
+
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
+  const { cancelAccountDeletion } = useAuth();
+
+  const handleConfirmRestore = async () => {
+    setIsRestoring(true);
+    try {
+      await cancelAccountDeletion({ email: email.trim(), password });
+      success("Welcome back! Account deletion has been cancelled and your account is restored.");
+      setShowRestoreDialog(false);
+      setError(null);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to cancel account deletion.";
+      toastError(msg);
+    } finally {
+      setIsRestoring(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-[380px] rounded-2xl border border-neutral-200/90 bg-white p-8 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/90">
@@ -89,14 +110,28 @@ export function LoginForm() {
       {error && (
         <div
           role="alert"
-          className="mb-5 space-y-2 rounded-lg border border-red-200 bg-red-50/90 p-3 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300"
+          className="mb-5 space-y-2.5 rounded-xl border border-red-200 bg-red-50/90 p-3.5 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300"
         >
           <div className="flex items-start gap-2.5">
             <AlertCircleIcon className="h-4 w-4 shrink-0 mt-0.5" />
             <span className="leading-snug whitespace-pre-line">{error}</span>
           </div>
 
-          {isUnverifiedError && (
+          {isDeletionPendingError && (
+            <div className="pt-1">
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                className="w-full text-xs font-semibold"
+                onClick={() => setShowRestoreDialog(true)}
+              >
+                Cancel Deletion & Restore Account
+              </Button>
+            </div>
+          )}
+
+          {isUnverifiedError && !isDeletionPendingError && (
             <div className="pt-1">
               <Button
                 type="button"
@@ -193,6 +228,19 @@ export function LoginForm() {
           Sign up
         </Link>
       </div>
+
+      {/* Restore Account Confirmation Dialog */}
+      <Dialog
+        isOpen={showRestoreDialog}
+        onClose={() => setShowRestoreDialog(false)}
+        onConfirm={handleConfirmRestore}
+        title="Restore Your Account?"
+        description="Your account is currently scheduled for permanent deletion. By restoring your account, the scheduled deletion will be cancelled immediately, your access and short links will remain active, and you will be signed in."
+        confirmText={isRestoring ? "Restoring..." : "Yes, Restore Account & Sign In"}
+        cancelText="No, Keep Deletion"
+        confirmVariant="primary"
+        isLoading={isRestoring}
+      />
     </div>
   );
 }

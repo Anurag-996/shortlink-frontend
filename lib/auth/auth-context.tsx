@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { loginApi, refreshApi, logoutApi, logoutAllApi, getProfileApi, updateProfileApi } from "@/lib/api/auth";
+import { loginApi, cancelAccountDeletionApi, refreshApi, logoutApi, logoutAllApi, getProfileApi, updateProfileApi } from "@/lib/api/auth";
 import { setApiAuthToken } from "@/lib/api/client";
 import type { LoginRequest } from "@/types/api";
 
@@ -21,6 +21,7 @@ interface AuthContextType {
   isLoading: boolean;
   isInitializing: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
+  cancelAccountDeletion: (credentials: LoginRequest) => Promise<void>;
   logout: () => Promise<void>;
   logoutAll: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
@@ -163,6 +164,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/app/dashboard");
   };
 
+  const cancelAccountDeletion = async (credentials: LoginRequest) => {
+    const response = await cancelAccountDeletionApi(credentials);
+    const accessToken = response.accessToken;
+
+    setToken(accessToken);
+    setUser({ email: credentials.email });
+    setApiAuthToken(accessToken);
+
+    await fetchProfile();
+
+    router.push("/app/dashboard");
+  };
+
   const updateProfileName = async (name: string) => {
     const updated = await updateProfileApi(name);
     setUser((prev) => (prev ? { ...prev, name: updated.name } : null));
@@ -198,19 +212,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await refreshApi();
       if (response.accessToken) {
-        const email = parseJwtSubject(response.accessToken) || user?.email || "admin";
         setToken(response.accessToken);
-        setUser({ email });
         setApiAuthToken(response.accessToken);
         await fetchProfile();
         return true;
       }
       return false;
-    } catch (err) {
-      console.warn("Failed to manually refresh session:", err);
-      setToken(null);
-      setUser(null);
-      setApiAuthToken(null);
+    } catch {
       return false;
     }
   };
@@ -224,6 +232,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading: isInitializing,
         isInitializing,
         login,
+        cancelAccountDeletion,
         logout,
         logoutAll,
         refreshSession,

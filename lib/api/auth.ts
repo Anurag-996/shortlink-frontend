@@ -22,6 +22,19 @@ export async function loginApi(credentials: LoginRequest): Promise<AuthResponse>
   return response;
 }
 
+export async function cancelAccountDeletionApi(credentials: LoginRequest): Promise<AuthResponse> {
+  const response = await apiClient<AuthResponse>("/api/auth/cancel-deletion", {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  });
+
+  if (response.accessToken) {
+    setApiAuthToken(response.accessToken);
+  }
+
+  return response;
+}
+
 export async function registerApi(data: RegisterRequest): Promise<ApiResponse> {
   return await apiClient<ApiResponse>("/api/auth/register", {
     method: "POST",
