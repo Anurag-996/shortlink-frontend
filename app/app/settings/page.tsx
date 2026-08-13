@@ -219,12 +219,14 @@ export default function AppSettingsPage() {
               </span>
             </div>
 
-            <div className="flex items-center justify-between p-3.5 text-xs">
-              <span className="text-neutral-500 dark:text-neutral-400">API Gateway</span>
-              <span className="font-mono text-neutral-700 dark:text-neutral-300">
-                {gatewayUrl}
-              </span>
-            </div>
+            {user?.role === "ADMIN" && (
+              <div className="flex items-center justify-between p-3.5 text-xs">
+                <span className="text-neutral-500 dark:text-neutral-400">API Gateway</span>
+                <span className="font-mono text-neutral-700 dark:text-neutral-300">
+                  {gatewayUrl}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Edit Display Name Form */}
