@@ -3,16 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { UrlCreator } from "@/components/urls/url-creator";
+import { PublicNavbar } from "@/components/layout/public-navbar";
 import { formatPublicShortUrl, truncateUrl } from "@/lib/utils/format";
 import { useToast } from "@/components/ui/toast";
-import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import {
   CopyIcon,
   CheckIcon,
   ExternalLinkIcon,
   LinkIcon,
-  UserIcon,
   SparklesIcon,
   BarChartIcon,
   CalendarIcon,
@@ -25,7 +24,6 @@ import type { ShortUrlResponse } from "@/types/api";
 
 export default function HomePage() {
   const { success } = useToast();
-  const { isAuthenticated, isInitializing } = useAuth();
   const [createdLinks, setCreatedLinks] = useState<ShortUrlResponse[]>([]);
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
@@ -219,63 +217,7 @@ export default function HomePage() {
       />
 
       {/* Top Navbar */}
-      <header className="border-b border-neutral-200/60 dark:border-neutral-800/60 bg-white/70 dark:bg-neutral-950/70 backdrop-blur-md sticky top-0 z-30">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-900 text-white shadow-xs dark:bg-neutral-100 dark:text-neutral-900">
-              <LinkIcon className="h-4 w-4" />
-            </div>
-            <span className="text-sm font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
-              TinyClick
-            </span>
-          </Link>
-
-          <nav className="flex items-center gap-4 text-xs font-medium text-neutral-600 dark:text-neutral-300">
-            <Link
-              href="/features"
-              className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors hidden sm:inline"
-            >
-              Features
-            </Link>
-            <Link
-              href="/faq"
-              className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors hidden sm:inline"
-            >
-              FAQ
-            </Link>
-
-            <div className="flex items-center gap-2 min-h-[32px]">
-              {isInitializing ? (
-                <div className="h-8 w-20 rounded-lg bg-neutral-200/60 dark:bg-neutral-800/60 animate-pulse" />
-              ) : isAuthenticated ? (
-                <Link href="/app/dashboard">
-                  <Button variant="primary" size="sm" className="text-xs">
-                    Dashboard
-                  </Button>
-                </Link>
-              ) : (
-                <>
-                  <Link href="/login">
-                    <Button variant="ghost" size="sm" className="text-xs">
-                      Sign in
-                    </Button>
-                  </Link>
-                  <Link href="/register">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      className="text-xs"
-                      leftIcon={<UserIcon className="h-3.5 w-3.5" />}
-                    >
-                      Get Started
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-      </header>
+      <PublicNavbar />
 
       <main className="flex-1">
         {/* HERO SECTION */}

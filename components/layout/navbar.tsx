@@ -26,6 +26,8 @@ export function Navbar() {
           { label: "Users", href: "/app/admin/users" },
         ]
       : []),
+    { label: "Features", href: "/features" },
+    { label: "FAQ", href: "/faq" },
     { label: "Settings", href: "/app/settings" },
   ];
 

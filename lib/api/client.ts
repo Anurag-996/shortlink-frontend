@@ -113,6 +113,17 @@ export async function apiClient<T>(
     headers.set("Authorization", `Bearer ${currentToken}`);
   }
 
+  if (typeof window !== "undefined" && !headers.has("X-Timezone")) {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz) {
+        headers.set("X-Timezone", tz);
+      }
+    } catch {
+      // Ignore
+    }
+  }
+
   const config: RequestInit = {
     ...options,
     headers,

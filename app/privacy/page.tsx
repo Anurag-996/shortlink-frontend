@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LinkIcon, ShieldCheckIcon } from "@/components/ui/icons";
-import { Button } from "@/components/ui/button";
+import { PublicNavbar } from "@/components/layout/public-navbar";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://tinyclick.in";
 
@@ -48,38 +48,7 @@ export default function PrivacyPolicyPage() {
       />
 
       {/* Top Navbar */}
-      <header className="border-b border-neutral-200/60 dark:border-neutral-800/60 bg-white/70 dark:bg-neutral-950/70 backdrop-blur-md sticky top-0 z-30">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-900 text-white shadow-xs dark:bg-neutral-100 dark:text-neutral-900">
-              <LinkIcon className="h-4 w-4" />
-            </div>
-            <span className="text-sm font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
-              TinyClick
-            </span>
-          </Link>
-
-          <nav className="flex items-center gap-4 text-xs font-medium text-neutral-600 dark:text-neutral-300">
-            <Link
-              href="/features"
-              className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
-            >
-              Features
-            </Link>
-            <Link
-              href="/faq"
-              className="hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors"
-            >
-              FAQ
-            </Link>
-            <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-xs">
-                Sign in
-              </Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PublicNavbar />
 
       {/* Main Content */}
       <main className="flex-1 mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-16 space-y-10">
