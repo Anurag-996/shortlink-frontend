@@ -7,7 +7,16 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: [
+          "/",
+          "/features",
+          "/faq",
+          "/privacy",
+          "/terms",
+          "/opengraph-image",
+          "/twitter-image",
+          "/manifest.webmanifest",
+        ],
         disallow: [
           "/app",
           "/app/*",

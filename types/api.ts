@@ -4,6 +4,12 @@ export interface CreateShortUrlRequest {
   expiresAt?: string | null;
 }
 
+export interface UpdateUrlRequest {
+  originalUrl: string;
+  expiresAt?: string | null;
+  resetAnalytics?: boolean;
+}
+
 export interface ShortUrlResponse {
   id: number;
   originalUrl: string;

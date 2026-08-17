@@ -19,6 +19,10 @@ export async function generateMetadata({
   return {
     title: `Redirecting /${shortCode}`,
     description: `Redirecting to destination URL for short link /${shortCode}.`,
+    robots: {
+      index: false,
+      follow: false,
+    },
   };
 }
 

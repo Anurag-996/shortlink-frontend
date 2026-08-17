@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { ShortUrlResponse } from "@/types/api";
+import type { ShortUrlResponse, UpdateUrlRequest } from "@/types/api";
+import { updateUrl } from "@/lib/api/urls";
 import {
   formatPublicShortUrl,
   truncateUrl,
@@ -13,6 +14,8 @@ import {
 import { useToast } from "@/components/ui/toast";
 import { Dialog } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "./empty-state";
 import {
   CopyIcon,
@@ -24,6 +27,10 @@ import {
   BarChartIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  EditIcon,
+  AlertCircleIcon,
+  CalendarIcon,
+  LinkIcon,
 } from "@/components/ui/icons";
 
 export type SortField = "createdAt" | "expiresAt" | "clickCount";
@@ -33,6 +40,7 @@ interface UrlListViewProps {
   urls: ShortUrlResponse[];
   isLoading?: boolean;
   onDelete?: (id: number) => Promise<void>;
+  onUpdate?: (id: number, data: UpdateUrlRequest) => Promise<ShortUrlResponse | void>;
   showSearch?: boolean;
   onEmptyAction?: () => void;
   // Pagination & Server Sorting props
@@ -53,6 +61,7 @@ export function UrlListView({
   urls,
   isLoading = false,
   onDelete,
+  onUpdate,
   showSearch = false,
   onEmptyAction,
   pagination,
@@ -67,6 +76,94 @@ export function UrlListView({
   const [urlToDelete, setUrlToDelete] = useState<ShortUrlResponse | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+
+  // Edit state
+  const [urlToEdit, setUrlToEdit] = useState<ShortUrlResponse | null>(null);
+  const [editOriginalUrl, setEditOriginalUrl] = useState("");
+  const [editExpiresAt, setEditExpiresAt] = useState("");
+  const [resetAnalytics, setResetAnalytics] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  const handleOpenEdit = (item: ShortUrlResponse) => {
+    setUrlToEdit(item);
+    setEditOriginalUrl(item.originalUrl);
+    setResetAnalytics(false);
+    if (item.expiresAt) {
+      const d = new Date(item.expiresAt);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const hours = String(d.getHours()).padStart(2, "0");
+      const minutes = String(d.getMinutes()).padStart(2, "0");
+      setEditExpiresAt(`${year}-${month}-${day}T${hours}:${minutes}`);
+    } else {
+      setEditExpiresAt("");
+    }
+    setEditError(null);
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!urlToEdit) return;
+    setEditError(null);
+
+    let trimmed = editOriginalUrl.trim();
+    if (!trimmed) {
+      setEditError("Please enter a destination URL.");
+      return;
+    }
+    if (!/^https?:\/\//i.test(trimmed)) {
+      if (/^(localhost|127\.\d+\.\d+\.\d+)(:\d+)?(\/.*)?$/i.test(trimmed)) {
+        trimmed = `http://${trimmed}`;
+      } else {
+        trimmed = `https://${trimmed}`;
+      }
+    }
+
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        setEditError("URL must start with http:// or https://");
+        return;
+      }
+    } catch {
+      setEditError("Please enter a valid URL.");
+      return;
+    }
+
+    if (editExpiresAt) {
+      const exp = new Date(editExpiresAt);
+      if (isNaN(exp.getTime()) || exp.getTime() <= Date.now()) {
+        setEditError("Expiration time must be in the future.");
+        return;
+      }
+    }
+
+    setIsUpdating(true);
+    try {
+      const payload: UpdateUrlRequest = {
+        originalUrl: trimmed,
+        expiresAt: editExpiresAt ? new Date(editExpiresAt).toISOString() : null,
+        resetAnalytics,
+      };
+
+      if (onUpdate) {
+        await onUpdate(urlToEdit.id, payload);
+      } else {
+        await updateUrl(urlToEdit.id, payload);
+      }
+
+      success("Destination URL updated successfully!");
+      setUrlToEdit(null);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to update URL.";
+      setEditError(msg);
+      toastError(msg);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   // Filter URLs based on search query
   const filteredUrls = urls.filter((item) => {
@@ -360,6 +457,14 @@ export function UrlListView({
                           )}
                         </button>
 
+                        <button
+                          onClick={() => handleOpenEdit(item)}
+                          className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 transition-colors cursor-pointer"
+                          title="Edit Destination URL"
+                        >
+                          <EditIcon className="h-3.5 w-3.5" />
+                        </button>
+
                         <Link
                           href={`/app/urls/${item.id}/analytics`}
                           className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 transition-colors"
@@ -459,6 +564,14 @@ export function UrlListView({
                   </button>
 
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleOpenEdit(item)}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 cursor-pointer"
+                    >
+                      <EditIcon className="h-3.5 w-3.5" />
+                      <span>Edit</span>
+                    </button>
+
                     <Link
                       href={`/app/urls/${item.id}/analytics`}
                       className="inline-flex items-center gap-1 text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200"
@@ -580,6 +693,110 @@ export function UrlListView({
         confirmVariant="danger"
         isLoading={isDeleting}
       />
+
+      {/* Edit Short Link Dialog */}
+      {urlToEdit && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in"
+            onClick={() => {
+              if (!isUpdating) setUrlToEdit(null);
+            }}
+          />
+
+          <div className="relative z-10 w-full max-w-lg rounded-2xl border border-neutral-200 bg-white p-6 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 transition-all animate-in fade-in zoom-in-95 space-y-5">
+            <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+              <div className="space-y-0.5">
+                <h3 className="text-base font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+                  Edit Short Link
+                </h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 font-mono">
+                  {formatPublicShortUrl(urlToEdit.shortCode)}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  if (!isUpdating) setUrlToEdit(null);
+                }}
+                disabled={isUpdating}
+                className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer text-sm font-semibold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              {editError && (
+                <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-300">
+                  <AlertCircleIcon className="h-4 w-4 shrink-0" />
+                  <span>{editError}</span>
+                </div>
+              )}
+
+              <Input
+                label="Destination URL"
+                placeholder="https://example.com/new-destination"
+                value={editOriginalUrl}
+                onChange={(e) => setEditOriginalUrl(e.target.value)}
+                disabled={isUpdating}
+                hint="The target page visitors will be redirected to"
+                leftIcon={<LinkIcon className="h-4 w-4 text-neutral-400" />}
+                required
+              />
+
+              <Input
+                label="Expiration Date (optional)"
+                type="datetime-local"
+                value={editExpiresAt}
+                onChange={(e) => setEditExpiresAt(e.target.value)}
+                disabled={isUpdating}
+                hint="Leave empty for a permanent link"
+                leftIcon={<CalendarIcon className="h-4 w-4 text-neutral-400" />}
+              />
+
+              <label className="flex items-start gap-2.5 rounded-xl border border-neutral-200 bg-neutral-50/70 p-3 text-xs text-neutral-700 dark:border-neutral-800 dark:bg-neutral-900/60 dark:text-neutral-300 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={resetAnalytics}
+                  onChange={(e) => setResetAnalytics(e.target.checked)}
+                  disabled={isUpdating}
+                  className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 cursor-pointer"
+                />
+                <div className="space-y-0.5">
+                  <span className="font-semibold text-neutral-900 dark:text-neutral-100">Reset click analytics</span>
+                  <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-normal">
+                    Wipe previous click events and reset the click counter to 0 for this new destination.
+                  </p>
+                </div>
+              </label>
+
+              <div className="pt-2 flex items-center justify-end gap-2.5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setUrlToEdit(null)}
+                  disabled={isUpdating}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  isLoading={isUpdating}
+                >
+                  {isUpdating ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

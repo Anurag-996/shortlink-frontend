@@ -1,6 +1,7 @@
 import { apiClient } from "./client";
 import type {
   CreateShortUrlRequest,
+  UpdateUrlRequest,
   ShortUrlResponse,
   PageResponse,
 } from "@/types/api";
@@ -10,6 +11,16 @@ export async function createShortUrl(
 ): Promise<ShortUrlResponse> {
   return apiClient<ShortUrlResponse>("/api/v1/urls", {
     method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateUrl(
+  id: number,
+  data: UpdateUrlRequest
+): Promise<ShortUrlResponse> {
+  return apiClient<ShortUrlResponse>(`/api/v1/urls/${id}`, {
+    method: "PUT",
     body: JSON.stringify(data),
   });
 }

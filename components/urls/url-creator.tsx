@@ -14,6 +14,7 @@ import {
   AlertCircleIcon,
   CalendarIcon,
 } from "@/components/ui/icons";
+import { isReservedAlias } from "@/lib/utils/constants";
 import type { ShortUrlResponse } from "@/types/api";
 
 interface UrlCreatorProps {
@@ -82,6 +83,10 @@ export function UrlCreator({ onCreated, className = "" }: UrlCreatorProps) {
       }
       if (!/^[a-zA-Z0-9_-]+$/.test(alias)) {
         setErrorMessage("Custom alias can only contain letters, numbers, hyphens, and underscores.");
+        return;
+      }
+      if (isReservedAlias(alias)) {
+        setErrorMessage(`The custom alias '${alias}' is a reserved keyword and cannot be used.`);
         return;
       }
     }

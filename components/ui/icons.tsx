@@ -12,6 +12,7 @@ export {
   Plus as PlusIcon,
   Search as SearchIcon,
   Shield as ShieldIcon,
+  ShieldCheck as ShieldCheckIcon,
   Settings as SettingsIcon,
   AlertCircle as AlertCircleIcon,
   CheckCircle2 as CheckCircleIcon,
@@ -37,4 +38,10 @@ export {
   AlertTriangle as AlertTriangleIcon,
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
+  Zap as ZapIcon,
+  Layers as LayersIcon,
+  Activity as ActivityIcon,
+  Filter as FilterIcon,
+  Pencil as EditIcon,
+  Pencil as PencilIcon,
 } from "lucide-react";

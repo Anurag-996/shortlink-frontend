@@ -6,7 +6,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { UrlCreator } from "@/components/urls/url-creator";
 import { UrlListView } from "@/components/urls/url-list-view";
 import { AnalyticsChart } from "@/components/analytics/analytics-chart";
-import { getAllUrls, deleteUrl } from "@/lib/api/urls";
+import { getAllUrls, deleteUrl, updateUrl } from "@/lib/api/urls";
 import { getDashboardAnalytics, getDashboardClickTimeSeries } from "@/lib/api/analytics";
 import { useAuth } from "@/lib/auth/auth-context";
 import { formatNumber } from "@/lib/utils/format";
@@ -16,7 +16,7 @@ import {
   BarChartIcon,
   CheckCircleIcon,
 } from "@/components/ui/icons";
-import type { ShortUrlResponse, PageResponse } from "@/types/api";
+import type { ShortUrlResponse, PageResponse, UpdateUrlRequest } from "@/types/api";
 import type { AnalyticsOverviewResponse, TimeSeriesPoint } from "@/types/analytics";
 
 const TIME_RANGES = [
@@ -136,6 +136,11 @@ export default function AppDashboardPage() {
     await deleteUrl(id);
     loadUrls();
     loadAnalytics(selectedRange);
+  };
+
+  const handleUpdate = async (id: number, data: UpdateUrlRequest) => {
+    const updated = await updateUrl(id, data);
+    setUrls((prev) => prev.map((u) => (u.id === id ? updated : u)));
   };
 
   return (
@@ -290,6 +295,7 @@ export default function AppDashboardPage() {
             urls={urls}
             isLoading={isLoadingUrls}
             onDelete={handleDelete}
+            onUpdate={handleUpdate}
           />
         </div>
       </div>

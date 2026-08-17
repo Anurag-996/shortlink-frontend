@@ -4,11 +4,11 @@ import { useEffect, useState, useCallback } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { UrlListView, SortField, SortDirection } from "@/components/urls/url-list-view";
 import { UrlCreator } from "@/components/urls/url-creator";
-import { getAllUrls, deleteUrl } from "@/lib/api/urls";
+import { getAllUrls, deleteUrl, updateUrl } from "@/lib/api/urls";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@/components/ui/icons";
-import type { ShortUrlResponse, PageResponse } from "@/types/api";
+import type { ShortUrlResponse, PageResponse, UpdateUrlRequest } from "@/types/api";
 
 export default function AppUrlsPage() {
   const { isAuthenticated, isInitializing } = useAuth();
@@ -117,6 +117,11 @@ export default function AppUrlsPage() {
     fetchData(pagination.page, pagination.size, sortField, sortDirection);
   };
 
+  const handleUpdate = async (id: number, data: UpdateUrlRequest) => {
+    const updated = await updateUrl(id, data);
+    setUrls((prev) => prev.map((u) => (u.id === id ? updated : u)));
+  };
+
   return (
     <AppShell>
       <div className="space-y-6 animate-in fade-in duration-300">
@@ -153,6 +158,7 @@ export default function AppUrlsPage() {
           urls={urls}
           isLoading={isLoading}
           onDelete={handleDelete}
+          onUpdate={handleUpdate}
           showSearch={true}
           onEmptyAction={() => setShowCreator(true)}
           pagination={pagination}

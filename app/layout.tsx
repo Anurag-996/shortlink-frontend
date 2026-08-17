@@ -24,13 +24,15 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://tinyclick.in";
+
 export const metadata: Metadata = {
   title: {
-    default: "TinyClick",
+    default: "TinyClick | Free Fast URL Shortener & Link Analytics",
     template: "%s | TinyClick",
   },
   description:
-    "Free, fast, and privacy-friendly URL shortener. Shorten long destination URLs with custom aliases, expiration dates, and real-time click analytics.",
+    "Free, fast, and privacy-friendly URL shortener. Shorten long links with custom aliases, editable destinations, expiration dates, and real-time click analytics. Zero ads, instant 302 redirects.",
   icons: {
     icon: "/icon.png",
     shortcut: "/icon.png",
@@ -40,17 +42,25 @@ export const metadata: Metadata = {
     "tinyclick",
     "url shortener",
     "link shortener",
-    "short link",
+    "short link generator",
+    "free url shortener",
     "custom url alias",
     "click analytics",
-    "free url shortener",
+    "trackable links",
+    "editable destination urls",
+    "link expiration",
+    "privacy link shortener",
+    "fast url redirection",
+    "link management platform",
+    "bitly alternative",
+    "shorten url free",
+    "tiny url",
   ],
-  authors: [{ name: "TinyClick Team" }],
+  authors: [{ name: "TinyClick Team", url: siteUrl }],
   creator: "TinyClick",
   publisher: "TinyClick",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://tinyclick.in"
-  ),
+  applicationName: "TinyClick",
+  metadataBase: new URL(siteUrl),
   alternates: {
     canonical: "/",
   },
@@ -59,15 +69,24 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "/",
     siteName: "TinyClick",
-    title: "TinyClick",
+    title: "TinyClick | Free Fast URL Shortener & Link Analytics",
     description:
-      "Transform long URLs into clean, fast, and trackable short links with custom aliases and real-time analytics.",
+      "Transform long URLs into clean, fast, and trackable short links with custom aliases, editable destinations, and real-time analytics.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "TinyClick - Free Fast URL Shortener with Custom Links & Analytics",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "TinyClick",
+    title: "TinyClick | Free Fast URL Shortener & Link Analytics",
     description:
-      "Transform long URLs into clean, fast, and trackable short links with custom aliases and real-time analytics.",
+      "Transform long URLs into clean, fast, and trackable short links with custom aliases, editable destinations, and real-time analytics.",
+    images: ["/twitter-image"],
   },
   robots: {
     index: true,
@@ -80,6 +99,7 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  category: "technology",
 };
 
 export default function RootLayout({
@@ -87,11 +107,46 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const globalStructuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: "TinyClick",
+        url: siteUrl,
+        logo: `${siteUrl}/icon.png`,
+        description:
+          "Fast, privacy-friendly URL shortener and link analytics platform.",
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        url: siteUrl,
+        name: "TinyClick",
+        publisher: {
+          "@id": `${siteUrl}/#organization`,
+        },
+        description:
+          "Free, fast, and privacy-friendly URL shortener with real-time analytics and custom aliases.",
+        inLanguage: "en-US",
+      },
+    ],
+  };
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(globalStructuredData),
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col font-sans">
         <AuthProvider>
           <ToastProvider>
