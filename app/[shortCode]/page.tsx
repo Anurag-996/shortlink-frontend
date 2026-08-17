@@ -28,18 +28,12 @@ export async function generateMetadata({
 
 async function resolveShortCode(
   shortCode: string,
-  clientIp: string,
-  userAgent: string,
-  referer: string
+  forwardHeaders: Record<string, string>
 ): Promise<{ status: number; location: string | null }> {
   try {
     const res = await fetch(`${GATEWAY_URL}/${encodeURIComponent(shortCode)}`, {
       method: "GET",
-      headers: {
-        ...(clientIp ? { "X-Forwarded-For": clientIp } : {}),
-        ...(userAgent ? { "User-Agent": userAgent } : {}),
-        ...(referer ? { "Referer": referer } : {}),
-      },
+      headers: forwardHeaders,
       redirect: "manual",
       cache: "no-store",
     });
@@ -58,15 +52,37 @@ export default async function ShortCodeRedirectPage({ params }: ShortCodePagePro
   const { shortCode } = await params;
   const headerList = await headers();
 
-  const clientIp = headerList.get("x-forwarded-for") || "";
-  const userAgent = headerList.get("user-agent") || "";
-  const referer = headerList.get("referer") || "";
+  const forwardHeaders: Record<string, string> = {};
+  const headerNames = [
+    "x-forwarded-for",
+    "x-real-ip",
+    "user-agent",
+    "referer",
+    "x-vercel-ip-country",
+    "x-vercel-ip-country-region",
+    "x-vercel-ip-city",
+    "x-vercel-ip-timezone",
+    "cf-ipcountry",
+    "cf-region",
+    "cf-ipcity",
+    "cf-timezone",
+    "x-country-code",
+    "x-country",
+    "x-region",
+    "x-city",
+    "accept-language",
+  ];
+
+  for (const name of headerNames) {
+    const val = headerList.get(name);
+    if (val) {
+      forwardHeaders[name] = val;
+    }
+  }
 
   const { status, location } = await resolveShortCode(
     shortCode,
-    clientIp,
-    userAgent,
-    referer
+    forwardHeaders
   );
 
   // 1. If valid short URL (302 Found), redirect directly to destination
